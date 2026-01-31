@@ -94,6 +94,21 @@ Restart Claude Code to apply the changes. Session data will now be written to `~
 
 ## Installation
 
+### Using Go Install (Recommended)
+
+```bash
+go install github.com/streetturtle/claude-anywhere/cmd/claude-anywhere@latest
+```
+
+**Make sure `$GOPATH/bin` is in your PATH:**
+
+```bash
+# Add to ~/.bashrc, ~/.zshrc, or similar:
+export PATH="$PATH:$(go env GOPATH)/bin"
+```
+
+After installation, the `claude-anywhere` command will be available globally from any directory.
+
 ### From Source
 
 ```bash
@@ -102,12 +117,6 @@ cd claude-anywhere
 make build
 sudo mv claude-anywhere /usr/local/bin/
 # Or use: make install
-```
-
-### Using Go Install
-
-```bash
-go install github.com/streetturtle/claude-anywhere/cmd/claude-anywhere@latest
 ```
 
 ## Usage

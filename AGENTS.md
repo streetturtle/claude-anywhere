@@ -10,7 +10,11 @@ This guide provides essential information for AI coding agents working on the `c
 
 ### Build Commands
 ```bash
-# Build the binary
+# Install globally (RECOMMENDED)
+go install ./cmd/claude-anywhere
+# This installs to $GOPATH/bin (usually ~/go/bin)
+
+# Build the binary locally
 make build
 # Or: go build -o claude-anywhere ./cmd/claude-anywhere
 
@@ -18,7 +22,7 @@ make build
 make run
 # Or: go run ./cmd/claude-anywhere
 
-# Build and install to /usr/local/bin
+# Build and install to /usr/local/bin (alternative)
 make install
 
 # Build for multiple platforms
