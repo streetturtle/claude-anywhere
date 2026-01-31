@@ -25,7 +25,6 @@ lint:
 build-all:
 	GOOS=darwin GOARCH=amd64 go build -o claude-anywhere-darwin-amd64 ./cmd/claude-anywhere
 	GOOS=darwin GOARCH=arm64 go build -o claude-anywhere-darwin-arm64 ./cmd/claude-anywhere
-	GOOS=linux GOARCH=amd64 go build -o claude-anywhere-linux-amd64 ./cmd/claude-anywhere
 
 # Run locally (development)
 run:

@@ -94,7 +94,23 @@ Restart Claude Code to apply the changes. Session data will now be written to `~
 
 ## Installation
 
-### Using Go Install (Recommended)
+### Pre-built Binaries (Easiest)
+
+Download the latest release from the [Releases page](https://github.com/streetturtle/claude-anywhere/releases):
+
+```bash
+# For Apple Silicon (M1/M2/M3)
+curl -L -o claude-anywhere https://github.com/streetturtle/claude-anywhere/releases/latest/download/claude-anywhere-darwin-arm64
+chmod +x claude-anywhere
+sudo mv claude-anywhere /usr/local/bin/
+
+# For Intel Macs
+curl -L -o claude-anywhere https://github.com/streetturtle/claude-anywhere/releases/latest/download/claude-anywhere-darwin-amd64
+chmod +x claude-anywhere
+sudo mv claude-anywhere /usr/local/bin/
+```
+
+### Using Go Install (Recommended for Go users)
 
 ```bash
 go install github.com/streetturtle/claude-anywhere/cmd/claude-anywhere@latest

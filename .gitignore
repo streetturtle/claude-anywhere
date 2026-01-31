@@ -1,5 +1,5 @@
-# Binaries
-claude-anywhere
+# Binaries (match binaries in root, not the cmd/claude-anywhere directory)
+/claude-anywhere
 claude-anywhere-*
 *.exe
 *.exe~
