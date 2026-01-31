@@ -21,22 +21,15 @@
 # Read the JSON input from stdin
 input=$(cat)
 
-# Extract session ID and CWD
+# Extract session ID
 session_id=$(echo "$input" | jq -r '.session_id // "unknown"')
-cwd=$(echo "$input" | jq -r '.cwd // ""')
 
 # Create sessions directory if it doesn't exist
 sessions_dir="$HOME/.claude_sessions"
 mkdir -p "$sessions_dir"
 
-# Create a sanitized filename based on CWD
-if [ -n "$cwd" ]; then
-  # Replace / with - and remove leading slash
-  sanitized_cwd=$(echo "$cwd" | sed 's/^\//-/' | sed 's/\//-/g')
-  status_file="$sessions_dir/claude-status${sanitized_cwd}.json"
-else
-  status_file="$sessions_dir/claude-status-${session_id}.json"
-fi
+# Use session_id as the filename to support multiple sessions from the same folder
+status_file="$sessions_dir/claude-status-${session_id}.json"
 
 # Write the status data to file with timestamp
 # Use milliseconds - on macOS, date doesn't support %N, so we append 000 to convert seconds to ms
