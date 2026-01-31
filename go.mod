@@ -1,4 +1,4 @@
-module github.com/streetturtle/clse
+module github.com/streetturtle/claude-anywhere
 
 go 1.25.5
 

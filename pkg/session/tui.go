@@ -20,9 +20,9 @@ var (
 	paginationStyle = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
 	helpStyle       = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
 
-	activeStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("46"))  // Green
-	idleStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("226")) // Yellow
-	closedStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("241")) // Gray
+	activeStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("46"))  // Green
+	idleStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("226")) // Yellow
+	closedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241")) // Gray
 
 	// Card styles
 	cardStyle = lipgloss.NewStyle().
@@ -41,8 +41,11 @@ var (
 
 	labelStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
 	valueStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("255"))
+	pathStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("245")) // Brighter gray for paths
 )
 
+// item wraps a Session to implement the list.Item interface for bubbletea's list component.
+// It provides the FilterValue, Title, and Description methods needed for list display and filtering.
 type item struct {
 	session *Session
 }
@@ -83,11 +86,13 @@ func (i item) Description() string {
 	return strings.Join(parts, " • ")
 }
 
+// model is the Elm-architecture model for the TUI application.
+// It holds the list component state, all sessions, and tracks the user's selection.
 type model struct {
-	list     list.Model
-	sessions []*Session
-	choice   *Session
-	quitting bool
+	list     list.Model  // bubbletea list component for rendering and navigation
+	sessions []*Session  // all loaded sessions
+	choice   *Session    // the session selected by the user (nil if none selected)
+	quitting bool        // true when the user quits without selecting
 }
 
 func (m model) Init() tea.Cmd {
@@ -200,11 +205,18 @@ func RunTUI(sessions []*Session) error {
 	return nil
 }
 
+// itemDelegate implements list.ItemDelegate to control how session items are rendered.
+// It provides custom card-style rendering with status indicators, stats, and visual selection state.
 type itemDelegate struct{}
 
-func (d itemDelegate) Height() int                             { return 3 }
-func (d itemDelegate) Spacing() int                            { return 0 }
+func (d itemDelegate) Height() int                             { return 3 } // Each card is 3 lines tall
+func (d itemDelegate) Spacing() int                            { return 0 } // No spacing between cards
 func (d itemDelegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd { return nil }
+
+// Render draws a session card with two lines of content inside a bordered box.
+// Line 1: Status icon (colored by state) + project name + path
+// Line 2: Model | Cost | Context% | Last activity | Tokens in/out | Lines changed
+// The card border color changes when selected (purple) vs unselected (gray).
 func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
 	i, ok := listItem.(item)
 	if !ok {
@@ -238,7 +250,16 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 	}
 
 	// Build compact card - all info on 2 lines
-	title := fmt.Sprintf("%s %s", styledIcon, valueStyle.Render(s.ProjectName))
+	// Format path - use ~ for home directory to keep it shorter
+	displayPath := s.CWD
+	if homeDir, err := os.UserHomeDir(); err == nil {
+		displayPath = strings.Replace(s.CWD, homeDir, "~", 1)
+	}
+
+	title := fmt.Sprintf("%s %s %s",
+		styledIcon,
+		valueStyle.Render(s.ProjectName),
+		pathStyle.Render(fmt.Sprintf("(%s)", displayPath)))
 
 	// Compact info line with separators
 	details := fmt.Sprintf("%s │ %s │ %s │ %s │ %s in/%s out │ %s",

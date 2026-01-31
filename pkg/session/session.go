@@ -19,46 +19,46 @@ const (
 )
 
 const (
-	ActivityThresholdMs = 3000       // 3 seconds
-	ClosedThresholdMs   = 3600000    // 1 hour
-	MaxAgeMs            = 604800000  // 7 days - sessions older than this are filtered by default
+	ActivityThresholdMs = 3000      // 3 seconds
+	ClosedThresholdMs   = 3600000   // 1 hour
+	MaxAgeMs            = 604800000 // 7 days - sessions older than this are filtered by default
 )
 
 // Session represents a Claude Code session with all its metadata
 type Session struct {
-	SessionID       string        `json:"session_id"`
-	CWD             string        `json:"cwd"`
-	ProjectDir      string        `json:"project_dir"`
-	ProjectName     string        `json:"project_name"`
-	Status          SessionStatus `json:"status"`
-	LastActivity    time.Time     `json:"last_activity"`
+	SessionID    string        `json:"session_id"`
+	CWD          string        `json:"cwd"`
+	ProjectDir   string        `json:"project_dir"`
+	ProjectName  string        `json:"project_name"`
+	Status       SessionStatus `json:"status"`
+	LastActivity time.Time     `json:"last_activity"`
 
 	// Model info
-	Model           string        `json:"model"`
+	Model string `json:"model"`
 
 	// Cost and usage
-	CostUSD         float64       `json:"cost_usd"`
-	DurationMs      int64         `json:"duration_ms"`
+	CostUSD    float64 `json:"cost_usd"`
+	DurationMs int64   `json:"duration_ms"`
 
 	// Context window
-	ContextUsedPct  float64       `json:"context_used_percent"`
-	InputTokens     int           `json:"input_tokens"`
-	OutputTokens    int           `json:"output_tokens"`
-	TotalTokens     int           `json:"total_tokens"`
+	ContextUsedPct float64 `json:"context_used_percent"`
+	InputTokens    int     `json:"input_tokens"`
+	OutputTokens   int     `json:"output_tokens"`
+	TotalTokens    int     `json:"total_tokens"`
 
 	// Code changes
-	LinesAdded      int           `json:"lines_added"`
-	LinesRemoved    int           `json:"lines_removed"`
+	LinesAdded   int `json:"lines_added"`
+	LinesRemoved int `json:"lines_removed"`
 
 	// Internal
-	StatusFilePath  string        `json:"-"`
+	StatusFilePath string `json:"-"`
 }
 
 // StatusLineData represents the JSON data written by statusline.sh
 type StatusLineData struct {
-	SessionID      string `json:"session_id"`
-	CWD            string `json:"cwd"`
-	UpdateTime     int64  `json:"_statusline_update_time"`
+	SessionID  string `json:"session_id"`
+	CWD        string `json:"cwd"`
+	UpdateTime int64  `json:"_statusline_update_time"`
 
 	Model struct {
 		ID          string `json:"id"`
@@ -70,26 +70,35 @@ type StatusLineData struct {
 	} `json:"workspace"`
 
 	Cost struct {
-		TotalCostUSD    float64 `json:"total_cost_usd"`
-		TotalDurationMs int64   `json:"total_duration_ms"`
-		TotalLinesAdded int     `json:"total_lines_added"`
-		TotalLinesRemoved int   `json:"total_lines_removed"`
+		TotalCostUSD      float64 `json:"total_cost_usd"`
+		TotalDurationMs   int64   `json:"total_duration_ms"`
+		TotalLinesAdded   int     `json:"total_lines_added"`
+		TotalLinesRemoved int     `json:"total_lines_removed"`
 	} `json:"cost"`
 
 	ContextWindow struct {
-		UsedPercentage   float64 `json:"used_percentage"`
-		TotalInputTokens int     `json:"total_input_tokens"`
-		TotalOutputTokens int    `json:"total_output_tokens"`
+		UsedPercentage    float64 `json:"used_percentage"`
+		TotalInputTokens  int     `json:"total_input_tokens"`
+		TotalOutputTokens int     `json:"total_output_tokens"`
 	} `json:"context_window"`
 }
 
-// LoadSessions reads all claude-status*.json files from /tmp and parses them
+// LoadSessions reads all claude-status*.json files from ~/.claude_sessions and parses them
 func LoadSessions() ([]*Session, error) {
-	tmpDir := "/tmp"
-
-	entries, err := os.ReadDir(tmpDir)
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return nil, fmt.Errorf("failed to read /tmp directory: %w", err)
+		return nil, fmt.Errorf("failed to get home directory: %w", err)
+	}
+
+	sessionsDir := filepath.Join(homeDir, ".claude_sessions")
+
+	entries, err := os.ReadDir(sessionsDir)
+	if err != nil {
+		// If directory doesn't exist, return empty sessions list
+		if os.IsNotExist(err) {
+			return []*Session{}, nil
+		}
+		return nil, fmt.Errorf("failed to read sessions directory: %w", err)
 	}
 
 	var sessions []*Session
@@ -104,7 +113,7 @@ func LoadSessions() ([]*Session, error) {
 			continue
 		}
 
-		filePath := filepath.Join(tmpDir, name)
+		filePath := filepath.Join(sessionsDir, name)
 		session, err := parseSessionFile(filePath)
 		if err != nil {
 			// Skip files that can't be parsed

@@ -1,5 +1,6 @@
 # Binaries
-cs
+claude-anywhere
+claude-anywhere-*
 *.exe
 *.exe~
 *.dll
