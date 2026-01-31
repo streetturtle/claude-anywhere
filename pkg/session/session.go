@@ -101,8 +101,7 @@ func LoadSessions() ([]*Session, error) {
 		return nil, fmt.Errorf("failed to read sessions directory: %w", err)
 	}
 
-	// Use a map to deduplicate sessions by session_id, keeping the most recent
-	sessionMap := make(map[string]*Session)
+	var sessions []*Session
 
 	for _, entry := range entries {
 		if entry.IsDir() {
@@ -121,19 +120,6 @@ func LoadSessions() ([]*Session, error) {
 			continue
 		}
 
-		// Deduplicate by session_id, keeping the most recent entry
-		if existing, ok := sessionMap[session.SessionID]; ok {
-			if session.LastActivity.After(existing.LastActivity) {
-				sessionMap[session.SessionID] = session
-			}
-		} else {
-			sessionMap[session.SessionID] = session
-		}
-	}
-
-	// Convert map to slice
-	sessions := make([]*Session, 0, len(sessionMap))
-	for _, session := range sessionMap {
 		sessions = append(sessions, session)
 	}
 
