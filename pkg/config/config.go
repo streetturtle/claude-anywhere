@@ -56,7 +56,7 @@ func Initialize(scriptContent []byte) error {
 		fmt.Println("To use clse, you need to add monitoring code to your existing statusline script.")
 		fmt.Println("")
 		fmt.Println("📖 See detailed instructions:")
-		fmt.Println("   https://github.com/YOUR_USERNAME/clse#existing-statusline")
+		fmt.Println("   https://github.com/streetturtle/clse#existing-statusline")
 		fmt.Println("")
 		fmt.Println("Quick start - ask Claude Code:")
 		fmt.Println("")

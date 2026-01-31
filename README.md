@@ -27,24 +27,24 @@ Working on multiple projects with Claude Code? Switching between sessions? Lost 
 ### From Source
 
 ```bash
-git clone <repository-url>
-cd cs
-go build -o cs ./cmd/cs
-sudo mv cs /usr/local/bin/
+git clone https://github.com/streetturtle/clse.git
+cd clse
+go build -o clse ./cmd/clse
+sudo mv clse /usr/local/bin/
 ```
 
 ### Using Go Install
 
 ```bash
-go install github.com/streetsidesoftware/cs/cmd/cs@latest
+go install github.com/streetturtle/clse/cmd/clse@latest
 ```
 
 ## Setup
 
-Before using `cs`, you need to initialize the statusline configuration:
+Before using `clse`, you need to initialize the statusline configuration:
 
 ```bash
-cs init
+clse init
 ```
 
 This command will:
@@ -52,4 +52,4 @@ This command will:
 2. Update your `~/.claude/settings.json` with the statusline configuration
 3. Make the script executable
 
-After running `cs init`, **restart any running Claude Code sessions** for the changes to take effect.
+After running `clse init`, **restart any running Claude Code sessions** for the changes to take effect.

@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/streetsidesoftware/clse/pkg/config"
-	"github.com/streetsidesoftware/clse/pkg/session"
+	"github.com/streetturtle/clse/pkg/config"
+	"github.com/streetturtle/clse/pkg/session"
 )
 
 //go:embed assets

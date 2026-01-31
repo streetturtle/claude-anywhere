@@ -1,4 +1,4 @@
-module github.com/streetsidesoftware/clse
+module github.com/streetturtle/clse
 
 go 1.25.5
 
