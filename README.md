@@ -1,4 +1,9 @@
 # claude-anywhere
+<p align="center">
+https://github.com/user-attachments/assets/f7cf75e6-0f76-4c69-8c79-ae2b76373396
+</p>
+
+
 
 **Resume any Claude Code session from anywhere.**
 
