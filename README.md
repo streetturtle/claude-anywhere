@@ -1,6 +1,7 @@
 # claude-anywhere
 <p align="center">
-https://github.com/user-attachments/assets/f7cf75e6-0f76-4c69-8c79-ae2b76373396
+<img width="723" height="438" alt="Screenshot 2026-01-31 at 10 24 10 PM" src="https://github.com/user-attachments/assets/ad6c8b44-84ff-40f1-b422-54d83578de04" />
+
 </p>
 
 
