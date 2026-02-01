@@ -88,8 +88,9 @@ type StatusLineData struct {
 // SessionsIndex represents the structure of sessions-index.json in Claude project directories
 type SessionsIndex struct {
 	Entries []struct {
-		SessionID string `json:"sessionId"`
-		Summary   string `json:"summary"`
+		SessionID   string `json:"sessionId"`
+		CustomTitle string `json:"customTitle"`
+		Summary     string `json:"summary"`
 	} `json:"entries"`
 }
 
@@ -247,6 +248,10 @@ func getSessionName(transcriptPath, sessionID string) string {
 	// Find matching session entry
 	for _, entry := range index.Entries {
 		if entry.SessionID == sessionID {
+			// Prefer customTitle (set via /rename) over summary (auto-generated)
+			if entry.CustomTitle != "" {
+				return entry.CustomTitle
+			}
 			return entry.Summary
 		}
 	}
