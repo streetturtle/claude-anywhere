@@ -157,7 +157,7 @@ claude-anywhere help         # Show help
 
 Each session shows:
 - **Status indicator** - Active (●), Idle (◐), or Closed (○)
-- **Project name** and working directory
+- **Session name** - Custom name if set (via `/name` in Claude Code), otherwise project folder name
 - **Model** - Which Claude model is being used
 - **Cost** - Total cost in USD for the session
 - **Context usage** - Percentage of context window used
@@ -166,6 +166,8 @@ Each session shows:
 - **Code changes** - Lines added/removed in the session
 
 The header shows aggregate stats: total sessions, active count, idle count, and total cost across all sessions.
+
+> **Tip**: Use `/name <your-name>` in Claude Code to give your sessions meaningful names that will show up in `claude-anywhere`!
 
 ## Troubleshooting
 
