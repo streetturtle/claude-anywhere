@@ -27,6 +27,7 @@ const (
 // Session represents a Claude Code session with all its metadata
 type Session struct {
 	SessionID    string        `json:"session_id"`
+	SessionName  string        `json:"session_name"`
 	CWD          string        `json:"cwd"`
 	ProjectDir   string        `json:"project_dir"`
 	ProjectName  string        `json:"project_name"`
@@ -56,9 +57,10 @@ type Session struct {
 
 // StatusLineData represents the JSON data written by statusline.sh
 type StatusLineData struct {
-	SessionID  string `json:"session_id"`
-	CWD        string `json:"cwd"`
-	UpdateTime int64  `json:"_statusline_update_time"`
+	SessionID      string `json:"session_id"`
+	TranscriptPath string `json:"transcript_path"`
+	CWD            string `json:"cwd"`
+	UpdateTime     int64  `json:"_statusline_update_time"`
 
 	Model struct {
 		ID          string `json:"id"`
@@ -81,6 +83,14 @@ type StatusLineData struct {
 		TotalInputTokens  int     `json:"total_input_tokens"`
 		TotalOutputTokens int     `json:"total_output_tokens"`
 	} `json:"context_window"`
+}
+
+// SessionsIndex represents the structure of sessions-index.json in Claude project directories
+type SessionsIndex struct {
+	Entries []struct {
+		SessionID string `json:"sessionId"`
+		Summary   string `json:"summary"`
+	} `json:"entries"`
 }
 
 // LoadSessions reads all claude-status*.json files from ~/.claude_sessions and parses them
@@ -204,7 +214,45 @@ func parseSessionFile(filePath string) (*Session, error) {
 		StatusFilePath: filePath,
 	}
 
+	// Try to get session name from sessions-index.json
+	session.SessionName = getSessionName(statusData.TranscriptPath, statusData.SessionID)
+
 	return session, nil
+}
+
+// getSessionName looks up the session name from sessions-index.json
+func getSessionName(transcriptPath, sessionID string) string {
+	// If transcript path is empty, can't look up the name
+	if transcriptPath == "" {
+		return ""
+	}
+
+	// Get the project directory (parent of transcript file)
+	projectDir := filepath.Dir(transcriptPath)
+	indexPath := filepath.Join(projectDir, "sessions-index.json")
+
+	// Read sessions-index.json
+	data, err := os.ReadFile(indexPath)
+	if err != nil {
+		// Silently fail - file might not exist or be readable
+		return ""
+	}
+
+	var index SessionsIndex
+	if err := json.Unmarshal(data, &index); err != nil {
+		// Silently fail - file might be malformed
+		return ""
+	}
+
+	// Find matching session entry
+	for _, entry := range index.Entries {
+		if entry.SessionID == sessionID {
+			return entry.Summary
+		}
+	}
+
+	// Session not found in index
+	return ""
 }
 
 // GetStatusIcon returns a colored status indicator for display

@@ -70,7 +70,19 @@ func (i item) Title() string {
 		styledIcon = closedStyle.Render(statusIcon)
 	}
 
-	return fmt.Sprintf("%s %s", styledIcon, i.session.ProjectName)
+	// Use session name if available, otherwise fall back to project name
+	displayName := i.session.SessionName
+	if displayName == "" {
+		displayName = i.session.ProjectName
+	}
+
+	// Truncate if too long
+	const maxNameLength = 50
+	if len(displayName) > maxNameLength {
+		displayName = displayName[:maxNameLength-3] + "..."
+	}
+
+	return fmt.Sprintf("%s %s", styledIcon, displayName)
 }
 
 func (i item) Description() string {
@@ -89,10 +101,10 @@ func (i item) Description() string {
 // model is the Elm-architecture model for the TUI application.
 // It holds the list component state, all sessions, and tracks the user's selection.
 type model struct {
-	list     list.Model  // bubbletea list component for rendering and navigation
-	sessions []*Session  // all loaded sessions
-	choice   *Session    // the session selected by the user (nil if none selected)
-	quitting bool        // true when the user quits without selecting
+	list     list.Model // bubbletea list component for rendering and navigation
+	sessions []*Session // all loaded sessions
+	choice   *Session   // the session selected by the user (nil if none selected)
+	quitting bool       // true when the user quits without selecting
 }
 
 func (m model) Init() tea.Cmd {

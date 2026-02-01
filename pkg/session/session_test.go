@@ -371,9 +371,9 @@ func TestFilterRecentSessions(t *testing.T) {
 	sessions := []*Session{
 		{SessionID: "recent-1", LastActivity: now.Add(-1 * time.Hour)},
 		{SessionID: "recent-2", LastActivity: now.Add(-24 * time.Hour)},
-		{SessionID: "recent-3", LastActivity: now.Add(-6 * 24 * time.Hour)},   // 6 days old
-		{SessionID: "old-1", LastActivity: now.Add(-8 * 24 * time.Hour)},      // 8 days old
-		{SessionID: "old-2", LastActivity: now.Add(-30 * 24 * time.Hour)},     // 30 days old
+		{SessionID: "recent-3", LastActivity: now.Add(-6 * 24 * time.Hour)}, // 6 days old
+		{SessionID: "old-1", LastActivity: now.Add(-8 * 24 * time.Hour)},    // 8 days old
+		{SessionID: "old-2", LastActivity: now.Add(-30 * 24 * time.Hour)},   // 30 days old
 	}
 
 	filtered := FilterRecentSessions(sessions)
