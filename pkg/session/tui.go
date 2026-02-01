@@ -268,9 +268,21 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 		displayPath = strings.Replace(s.CWD, homeDir, "~", 1)
 	}
 
+	// Use session name if available, otherwise fall back to project name
+	displayName := s.SessionName
+	if displayName == "" {
+		displayName = s.ProjectName
+	}
+
+	// Truncate if too long
+	const maxNameLength = 50
+	if len(displayName) > maxNameLength {
+		displayName = displayName[:maxNameLength-3] + "..."
+	}
+
 	title := fmt.Sprintf("%s %s %s",
 		styledIcon,
-		valueStyle.Render(s.ProjectName),
+		valueStyle.Render(displayName),
 		pathStyle.Render(fmt.Sprintf("(%s)", displayPath)))
 
 	// Compact info line with separators
