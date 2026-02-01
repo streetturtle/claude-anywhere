@@ -1,66 +1,70 @@
 # claude-anywhere
+
 <p align="center">
-<img width="723" height="438" alt="Screenshot 2026-01-31 at 10 24 10 PM" src="https://github.com/user-attachments/assets/ad6c8b44-84ff-40f1-b422-54d83578de04" />
-
+<img width="723" height="438" alt="Screenshot 2026-01-31 at 10 24 10 PM" src="https://github.com/user-attachments/assets/ad6c8b44-84ff-40f1-b422-54d83578de04" />
 </p>
-
-
 
 **Resume any Claude Code session from anywhere.**
 
 Never lose track of your Claude sessions again. `claude-anywhere` lets you see all your Claude Code sessions across all projects and instantly jump back into any of them - no matter which directory you're in.
 
-## Why claude-anywhere?
+## Quick Start
 
-Working on multiple projects with Claude Code? Switching between sessions? Lost track of where you started that important conversation?
+> **Tip**: Just ask Claude Code to install this for you! Share this repo URL with Claude and say: "Install claude-anywhere from https://github.com/streetturtle/claude-anywhere"
 
-**Just run `claude-anywhere` from anywhere:**
-- See all your active and recent Claude sessions in one place
-- Search by project name or model
-- Press Enter to resume any session
-- View costs, context usage, and session stats
+### Installation
 
-## Features
-
-- ⚡ **Resume from anywhere** - Jump into any Claude session from any directory
-- 📊 **Interactive TUI** - Beautiful terminal UI with keyboard navigation and search
-- 💰 **Cost tracking** - See real-time costs, token usage, and context window usage
-- 🎨 **Status indicators** - Quickly identify active, idle, and closed sessions
-- 🔍 **Fast search** - Filter sessions by project name or model
+```bash
+brew install streetturtle/tap/claude-anywhere
+```
 
 ## Prerequisites
 
-`claude-anywhere` requires Claude Code's statusline feature to be enabled. This feature writes session data to `~/.claude_sessions/` as JSON files.
+Before using `claude-anywhere`, you need to set up a statusline script that captures session data.
 
-### Setup Instructions
-
-**Step 1: Enable Claude Code statusline (if not already enabled)**
-
-If you don't have a statusline configured yet, run this in Claude Code:
-
-```
-/status
-```
-
-Follow the prompts to set up your statusline. This will create a statusline script in `~/.claude/` and configure it in your `settings.json`.
-
-**Step 2: Install the session writer script**
-
-Copy the session tracking script to your Claude directory:
+### 1. Install `jq` if you don't have it
 
 ```bash
-# Clone this repo (or download write-status.sh from assets/)
-git clone https://github.com/streetturtle/claude-anywhere.git
-cd claude-anywhere
+brew install jq
+```
 
-# Copy the script
-cp assets/write-status.sh ~/.claude/
+### 2. Create the session writer script
+
+Create `~/.claude/write-status.sh` with the following content:
+
+```bash
+#!/bin/bash
+
+# Read the JSON input from stdin
+input=$(cat)
+
+# Extract session ID
+session_id=$(echo "$input" | jq -r '.session_id // "unknown"')
+
+# Create sessions directory if it doesn't exist
+sessions_dir="$HOME/.claude_sessions"
+mkdir -p "$sessions_dir"
+
+# Use session_id as the filename to support multiple sessions from the same folder
+status_file="$sessions_dir/claude-status-${session_id}.json"
+
+# Write the status data to file with timestamp
+# Use milliseconds - on macOS, date doesn't support %N, so we append 000 to convert seconds to ms
+echo "$input" | jq ". + {\"_statusline_update_time\": $(date +%s)000}" > "$status_file"
+
+# Pass the input to stdout for the next script in the pipe
+echo "$input"
+```
+
+Make it executable:
+
+```bash
 chmod +x ~/.claude/write-status.sh
 ```
 
-**Step 3: Update your statusline command**
+### 3. Configure Claude Code statusline
 
-Edit `~/.claude/settings.json` and modify your existing `statusLine.command` to pipe through `write-status.sh`:
+Edit `~/.claude/settings.json` and add or update the `statusLine` configuration:
 
 ```json
 {
@@ -72,83 +76,45 @@ Edit `~/.claude/settings.json` and modify your existing `statusLine.command` to 
 }
 ```
 
-For example, if your current statusline command is `~/.claude/print-statusline.sh`, change it to:
+If you don't have an existing statusline script, you can use just the writer:
 
 ```json
-"command": "~/.claude/write-status.sh | ~/.claude/print-statusline.sh"
+{
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/write-status.sh",
+    "padding": 0
+  }
+}
 ```
 
-The `write-status.sh` script will:
-- Receive session data from Claude Code
-- Save it to `~/.claude_sessions/claude-status-<project>.json`
-- Pass the data through to your existing statusline script (so your terminal display stays the same)
-
-**Step 4: Restart Claude Code**
+### 4. Restart Claude Code
 
 Restart Claude Code to apply the changes. Session data will now be written to `~/.claude_sessions/`.
 
-> **Note**: The scripts require `jq` to be installed: `brew install jq` (macOS) or `apt-get install jq` (Linux)
-
-## Installation
-
-### Homebrew (Recommended)
-
-```bash
-brew install streetturtle/tap/claude-anywhere
-```
-
-### From Source
-
-```bash
-go install github.com/streetturtle/claude-anywhere/cmd/claude-anywhere@latest
-```
-
-**Make sure `$GOPATH/bin` is in your PATH:**
-
-```bash
-# Add to ~/.bashrc, ~/.zshrc, or similar:
-export PATH="$PATH:$(go env GOPATH)/bin"
-```
-
-After installation, the `claude-anywhere` command will be available globally from any directory.
-
-### From Source
-
-```bash
-git clone https://github.com/streetturtle/claude-anywhere.git
-cd claude-anywhere
-make build
-sudo mv claude-anywhere /usr/local/bin/
-# Or use: make install
-```
-
 ## Usage
 
-Simply run `claude-anywhere` from any directory:
+Simply run from any directory:
 
 ```bash
 claude-anywhere
-# Or explicitly: claude-anywhere list
 ```
-
-The tool reads session data from `~/.claude_sessions/` (populated by the statusline feature) and displays all your sessions in an interactive terminal UI.
 
 ### Keyboard Controls
 
 - **↑/↓** or **j/k** - Navigate through sessions
-- **/** - Search/filter sessions by project name or model
+- **/** - Search/filter sessions
 - **Enter** - Resume selected session
 - **q** or **Ctrl+C** - Quit
 - **Esc** - Clear search filter
 
-## Commands
+## Features
 
-```bash
-claude-anywhere              # Launch interactive session browser (default)
-claude-anywhere list         # Same as above
-claude-anywhere completion   # Generate shell completion script
-claude-anywhere help         # Show help
-```
+- ⚡ **Resume from anywhere** - Jump into any Claude session from any directory
+- 📊 **Interactive TUI** - Beautiful terminal UI with keyboard navigation and search
+- 💰 **Cost tracking** - See real-time costs, token usage, and context window usage
+- 🎨 **Status indicators** - Quickly identify active (●), idle (◐), and closed (○) sessions
+- 🔍 **Fast search** - Filter sessions by project name or model
 
 ## What's Displayed
 
@@ -166,59 +132,34 @@ The header shows aggregate stats: total sessions, active count, idle count, and 
 
 > **Tip**: Use `/rename <your-name>` in Claude Code to give your sessions meaningful names that will show up in `claude-anywhere`!
 
+> **Note**: Session names may take a moment to update due to how Claude Code updates its session index. This is a known limitation in Claude Code itself.
+
 ## Troubleshooting
 
 ### No sessions showing up
 
-**Problem**: Running `claude-anywhere` shows an empty list or "No sessions found".
-
-**Solutions**:
-1. **Verify statusline is configured**: Check that `~/.claude/settings.json` contains a `statusLine` configuration
-2. **Check the session writer script**: Ensure `~/.claude/write-status.sh` exists and is executable (`chmod +x ~/.claude/write-status.sh`)
-3. **Verify the sessions directory**: Check that `~/.claude_sessions/` exists and contains `claude-status-*.json` files
-4. **Start a Claude session**: The statusline only writes data when a Claude Code session is active. Start a session and interact with it, then try again
+1. Check that `~/.claude/settings.json` has the `statusLine` configuration
+2. Ensure `~/.claude/write-status.sh` exists and is executable: `chmod +x ~/.claude/write-status.sh`
+3. Verify `~/.claude_sessions/` exists and contains `claude-status-*.json` files
+4. Make sure you have an active Claude Code session
 
 ### "jq: command not found" error
 
-**Problem**: The statusline script fails because `jq` is not installed.
-
-**Solution**: Install `jq`:
+Install `jq`:
 ```bash
-# macOS
 brew install jq
-
-# Ubuntu/Debian
-sudo apt-get install jq
-
-# Fedora
-sudo dnf install jq
-```
-
-### Permission denied errors
-
-**Problem**: Scripts fail with permission errors.
-
-**Solution**: Make the scripts executable:
-```bash
-chmod +x ~/.claude/write-status.sh
-chmod +x ~/.claude/print-statusline.sh  # if you have this
 ```
 
 ### Sessions show as "Closed" immediately
 
-**Problem**: All sessions appear as closed even when Claude is running.
-
-**Solutions**:
-1. **Check script pipeline**: Verify your `settings.json` has the correct command pipeline with `write-status.sh` first
-2. **Restart Claude Code**: Changes to `settings.json` require restarting Claude Code
-3. **Check file timestamps**: Run `ls -la ~/.claude_sessions/` to verify files are being updated
+1. Verify your `settings.json` has the correct command with `write-status.sh`
+2. Restart Claude Code
+3. Check file timestamps: `ls -la ~/.claude_sessions/` to verify files are being updated
 
 ### Old sessions cluttering the list
 
-**Problem**: Sessions from weeks ago are still showing up.
+By default, `claude-anywhere` shows sessions from the last 7 days. You can clean up old session files:
 
-**Note**: By default, `claude-anywhere` shows sessions from the last 7 days. Older session files in `~/.claude_sessions/` can be safely deleted:
 ```bash
-# Remove session files older than 7 days
 find ~/.claude_sessions -name "claude-status-*.json" -mtime +7 -delete
 ```
